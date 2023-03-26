@@ -90,6 +90,9 @@ function subPrice() {
 }
 
 function generateBills() {
+  var subNo = formContext
+    .getAttribute("balbilal_telecomsubscriptionid")
+    .getValue();
   var duration = formContext.getAttribute("balbilal_subduration").getText();
   var generateMonthlyBill = formContext
     .getAttribute("balbilal_generatemonthlybill")
@@ -101,18 +104,22 @@ function generateBills() {
     var monthlyFee = subPrice / duration;
 
     for (var i = 1; i <= duration; i++) {
-      var billID = "B0" + "-" + i;
+      var billID = "B" + i + "-" + subNo;
       var subId = formContext.data.entity
         .getId()
         .replace("{", "")
         .replace("}", "");
+      var remainingBills = duration - i;
       var newBill = {
         balbilal_telbillingid: billID,
         "balbilal_SubscriptionIDLP@odata.bind":
           "/balbilal_subscriptions(" + subId + ")",
         balbilal_billamount: monthlyFee,
         balbilal_billstatus: 578550000,
-        // balbilal_billgeneratedon: "",
+
+        balbilal_billfor: "Month " + i,
+        balbilal_remainingbills: remainingBills.toString(),
+        balbilal_subscriptionamount: subPrice,
       };
 
       Xrm.WebApi.createRecord("balbilal_billing", newBill).then(
@@ -124,7 +131,7 @@ function generateBills() {
         }
       );
     }
-    alert(duration + "Bill records created");
+    alert(duration + " Bill records created");
   }
 }
 
