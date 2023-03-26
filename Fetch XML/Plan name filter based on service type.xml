@@ -1,0 +1,20 @@
+<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="false">
+  <entity name="balbilal_subscription">
+    <attribute name="balbilal_subscriptionid" />
+    <attribute name="balbilal_telecomsubscriptionid" />
+    <attribute name="createdon" />
+    <order attribute="balbilal_telecomsubscriptionid" descending="false" />
+    <filter type="and">
+      <condition attribute="balbilal_servicetype" operator="in">
+        <value>578550001</value>
+        <value>578550000</value>
+        <value>578550002</value>
+      </condition>
+    </filter>
+    <link-entity name="balbilal_service" from="balbilal_serviceid" to="balbilal_associatedplanname" link-type="inner" alias="ag">
+      <filter type="and">
+        <condition attribute="balbilal_planname" operator="eq" value="" />
+      </filter>
+    </link-entity>
+  </entity>
+</fetch>

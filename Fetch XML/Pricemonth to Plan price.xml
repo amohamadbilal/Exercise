@@ -1,0 +1,16 @@
+<fetch version="1.0" output-format="xml-platform" mapping="logical" distinct="true">
+  <entity name="balbilal_service">
+    <attribute name="balbilal_serviceid" />
+    <attribute name="balbilal_planname" />
+    <attribute name="createdon" />
+    <order attribute="balbilal_planname" descending="false" />
+    <filter type="and">
+      <condition attribute="balbilal_pricemonth" operator="not-null" />
+    </filter>
+    <link-entity name="balbilal_subscription" from="balbilal_associatedplanname" to="balbilal_serviceid" link-type="inner" alias="ae">
+      <filter type="and">
+        <condition attribute="balbilal_planprice" operator="eq" value="" />
+      </filter>
+    </link-entity>
+  </entity>
+</fetch>
