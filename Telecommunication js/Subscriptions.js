@@ -100,37 +100,53 @@ function generateBills() {
   var subPrice = formContext
     .getAttribute("balbilal_subscriptionprice")
     .getValue();
+  var subId = formContext.data.entity.getId().replace("{", "").replace("}", "");
+
   if (duration != null && generateMonthlyBill === true) {
     var monthlyFee = subPrice / duration;
 
-    for (var i = 1; i <= duration; i++) {
-      var billID = "B" + i + "-" + subNo;
-      var subId = formContext.data.entity
-        .getId()
-        .replace("{", "")
-        .replace("}", "");
-      var remainingBills = duration - i;
-      var newBill = {
-        balbilal_telbillingid: billID,
-        "balbilal_SubscriptionIDLP@odata.bind":
-          "/balbilal_subscriptions(" + subId + ")",
-        balbilal_billamount: monthlyFee,
-        balbilal_billstatus: 578550000,
+    Xrm.WebApi.retrieveRecord(
+      "balbilal_subscription",
+      subId,
+      "?$select=balbilal_startdate"
+    ).then(
+      function success(result) {
+        var subscriptionStartDate = result.balbilal_startdate;
 
-        balbilal_billfor: "Month " + i,
-        balbilal_remainingbills: remainingBills.toString(),
-        balbilal_subscriptionamount: subPrice,
-      };
+        for (var i = 1; i <= duration; i++) {
+          var billID = "B" + i + "-" + subNo;
+          var remainingBills = duration - i;
+          var billDate = new Date(subscriptionStartDate);
+          billDate.setMonth(billDate.getMonth() + i);
+          var billDateString = billDate.toISOString();
+          var billDateSubString = billDateString.substring(0, 10);
+          var newBill = {
+            balbilal_telbillingid: billID,
+            "balbilal_SubscriptionIDLP@odata.bind":
+              "/balbilal_subscriptions(" + subId + ")",
+            balbilal_billamount: monthlyFee,
+            balbilal_billstatus: 578550000,
 
-      Xrm.WebApi.createRecord("balbilal_billing", newBill).then(
-        function success(result) {
-          console.log("Bill created with ID: " + result.id);
-        },
-        function (error) {
-          console.log(error.message);
+            balbilal_billfor: "Month " + i,
+            balbilal_remainingbills: remainingBills.toString(),
+            balbilal_subscriptionamount: subPrice,
+            balbilal_billgeneratedon: billDateSubString,
+          };
+
+          Xrm.WebApi.createRecord("balbilal_billing", newBill).then(
+            function success(result) {
+              console.log("Bill created with ID: " + result.id);
+            },
+            function (error) {
+              console.log(error.message);
+            }
+          );
         }
-      );
-    }
+      },
+      function (error) {
+        console.log(error.message);
+      }
+    );
     alert(duration + " Bill records created");
   }
 }
