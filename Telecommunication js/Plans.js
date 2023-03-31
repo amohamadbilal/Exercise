@@ -5,6 +5,7 @@ function plans(executionContext) {
   formContext.getAttribute("balbilal_servicetype").addOnChange(voiceHide);
   formContext.getAttribute("balbilal_servicetype").addOnChange(lockFields);
   retrieveNoOfSubns();
+
   // formContext.getAttribute("balbilal_broadbandspeed").addOnChange(RemoveOption);
   // deleteRecord();
   // formContext.getAttribute("balbilal_planname").addOnChange(setPlanName);

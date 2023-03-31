@@ -1,9 +1,57 @@
 var formContext = "";
 function billings(executionContext) {
   formContext = executionContext.getFormContext();
+  getNextAutoNumberValueRequest();
   // retrieveNoOfPaidBills();
   // createNewRecordCustomerLookup();
   // Last7DaysSumAmt()
+}
+
+function getNextAutoNumberValueRequest() {
+  var Sdk = window.Sdk || {};
+
+  Sdk.AutoNumber = function (entityName, attributeName) {
+    this.EntityName = entityName;
+    this.AttributeName = attributeName;
+  };
+
+  Sdk.AutoNumber.prototype.getMetadata = function () {
+    return {
+      boundParameter: null,
+      parameterTypes: {
+        EntityName: {
+          typeName: "Edm.String",
+          structuralProperty: 1,
+        },
+        AttributeName: {
+          typeName: "Edm.String",
+          structuralProperty: 1,
+        },
+      },
+      operationType: 0,
+      operationName: "GetNextAutoNumberValue",
+    };
+  };
+
+  var autoNumber = new Sdk.AutoNumber(
+    "balbilal_billing",
+    "balbilal_autonumber"
+  );
+
+  Xrm.WebApi.online
+    .execute(autoNumber)
+    .then(function (response) {
+      if (response.ok) {
+        alert("Status: " + response.status);
+        return response.json();
+      }
+    })
+    .then(function (responseBody) {
+      alert("Next Auto Generate Number is" + responseBody.NextAutoNumberValue);
+    })
+    .catch(function (error) {
+      console.log(error.message);
+    });
 }
 
 // function retrieveNoOfPaidBills() {
