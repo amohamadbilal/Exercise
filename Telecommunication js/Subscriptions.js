@@ -2,6 +2,8 @@ var formContext = "";
 
 function subscriptions(executionContext) {
   formContext = executionContext.getFormContext();
+  calRollUp();
+  assignUser();
   // formContext
   //   .getAttribute("balbilal_associatedplanname")
   //   .addOnChange(retrievePlanPrice);
@@ -11,7 +13,6 @@ function subscriptions(executionContext) {
   // formContext
   //   .getAttribute("balbilal_generatemonthlybill")
   //   .addOnChange(generateBills);
-  calRollUp();
 
   // formContext.getControl("balbilal_duration").setDisabled(true);
   // formContext.getControl("balbilal_discount").setDisabled(true);
@@ -34,24 +35,24 @@ function calRollUp() {
     return {
       boundParameter: null,
       parameterTypes: {
-        "Target": {
-          "typeName": "mscrm.crmbaseentity",
-          "structuralProperty": 5
+        Target: {
+          typeName: "mscrm.crmbaseentity",
+          structuralProperty: 5,
         },
-        "FieldName": {
-          "typeName": "Edm.String",
-          "structuralProperty": 1
+        FieldName: {
+          typeName: "Edm.String",
+          structuralProperty: 1,
         },
       },
       operationType: 1, // This is a function. Use '0' for actions and '2' for CRUD
-      operationName: "CalculateRollupField"
+      operationName: "CalculateRollupField",
     };
   };
 
   // Create variables to point to a quote record and to a specific column
   var quoteId = {
     "@odata.type": "Microsoft.Dynamics.CRM.balbilal_subscription",
-    "balbilal_subscriptionid": Id
+    balbilal_subscriptionid: Id,
   };
 
   // The roll-up column for which we want to force a re-calculation
@@ -84,6 +85,58 @@ function calRollUp() {
       console.log(error.message);
       // handle error conditions
     });
+}
+
+function assignUser() {
+  var Sdk = window.Sdk || {};
+  var id = formContext.data.entity.getId();
+
+  if (id != "") {
+    Sdk.assignOtherUser = function (relatedRecord, userId) {
+      this.RelatedRecord = relatedRecord;
+      this.UserId = userId;
+    };
+    Sdk.assignOtherUser.prototype.getMetadata = function () {
+      return {
+        boundParameter: null,
+        parameterTypes: {
+          RelatedRecord: {
+            typeName: "mscrm.balbilal_subscription",
+            structuralProperty: 5,
+          },
+          UserId: {
+            typeName: "mscrm.systemuser",
+            structuralProperty: 5,
+          },
+        },
+        operationType: 0,
+        operationName: "balbilal_AssignOtherUser",
+      };
+    };
+
+    var RelatedRecord = {
+      "@odata.type": "Microsoft.Dynamics.CRM.balbilal_subscription",
+      balbilal_subscriptionid: id,
+    };
+
+    var UserId = {
+      entityType: "systemuser",
+      id: "91747742-70cd-ed11-a7c6-000d3a0a825c",
+    };
+
+    var assignUser = new Sdk.assignOtherUser(RelatedRecord, UserId);
+
+    Xrm.WebApi.online
+      .execute(assignUser)
+      .then(function (response) {
+        if (response.ok) {
+          alert("Newly Assigned User For This Record is: " + response.status);
+        }
+      })
+      .catch(function (error) {
+        alert(error.message);
+      });
+  }
 }
 
 // function retrievePlanPrice() {
